@@ -70,7 +70,7 @@ public class SwatRed_Tele_R5 extends LinearOpMode {
         runtime.reset();
 
         double drive = 0;
-        double turn  = 0;
+        double turn = 0;
 
 
         // run until the end of the match (driver presses STOP)
@@ -78,7 +78,6 @@ public class SwatRed_Tele_R5 extends LinearOpMode {
             // Setup a variable for each drive wheel to save power level for telemetry
             double drive_power;
             double turn_power;
-
 
 
             // Choose to drive using either Tank Mode, or POV Mode
@@ -105,7 +104,9 @@ public class SwatRed_Tele_R5 extends LinearOpMode {
                 turn_power = Range.clip(turn, -1.0, 1.0);
                 robot.drive(TeamRobot_R5.DRIVE_OPTION.TURN, -turn_power);
             }
-
+        }
+    }
+}
 
 /**
  * Method to perfmorm a relative move, based on encoder counts.
