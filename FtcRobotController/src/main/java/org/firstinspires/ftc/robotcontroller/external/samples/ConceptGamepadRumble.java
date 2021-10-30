@@ -197,4 +197,12 @@ public class ConceptGamepadRumble extends LinearOpMode
             sleep(10);
         }
     }
+
+    public static final class BuildConfig {
+      public static final boolean DEBUG = Boolean.parseBoolean("true");
+      public static final String LIBRARY_PACKAGE_NAME = "com.qualcomm.ftcrobotcontroller";
+      public static final String BUILD_TYPE = "debug";
+      // Field from default config.
+      public static final String APP_BUILD_TIME = "2021-10-29T18:29:53.325-0600";
+    }
 }
