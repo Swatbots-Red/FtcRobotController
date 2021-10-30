@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;/* Copyright (c) 2017 FIRST. All rights reserved.
+/* Copyright (c) 2017 FIRST. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted (subject to the limitations in the disclaimer below) provided that
@@ -32,8 +32,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.TeamRobot_R5;
 
 
 /**
@@ -71,7 +69,11 @@ public class SwatRed_Tele_R5 extends LinearOpMode {
         double drive = 0;
         double turn  = 0;
         boolean arm_state = false;
+        boolean clamp_state = false;
         boolean auto_state = false;
+        boolean foundation_state = false;
+        boolean clamp_complete = true;
+        boolean arm_complete = true;
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -79,8 +81,8 @@ public class SwatRed_Tele_R5 extends LinearOpMode {
             double drive_power;
             double turn_power;
             double strafe_power;
-            boolean linear_lift = false;
-            boolean linear_state = false;
+            double strafe_left = 0;
+            double strafe_right = 0;
 
 
             // Choose to drive using either Tank Mode, or POV Mode
@@ -108,21 +110,93 @@ public class SwatRed_Tele_R5 extends LinearOpMode {
                 robot.drive(TeamRobot_R5.DRIVE_OPTION.TURN, -turn_power);
             }
 
+            //Strafe operation
+            if (Math.abs(gamepad1.right_trigger) > 0.1) {
+                strafe_right = gamepad1.right_trigger;
+                strafe_power = Range.clip(strafe_right, -1.0, 1.0);
+                robot.drive(TeamRobot_R5.DRIVE_OPTION.RIGHTSTRAFE, strafe_power);
+            } else if (Math.abs(gamepad1.left_trigger) > 0.1) {
+                strafe_left = gamepad1.left_trigger;
+                strafe_power = Range.clip(strafe_left, -1.0, 1.0);
+                robot.drive(TeamRobot_R5.DRIVE_OPTION.LEFTSTRAFE, strafe_power);
+            }
+
+            if (Math.abs(gamepad1.right_stick_x) < 0.1 && Math.abs(gamepad1.left_stick_y) < 0.1 && gamepad1.left_trigger < 0.1 && gamepad1.right_trigger < 0.1) {
+                robot.stop();
+            }
+
+            if(gamepad1.a) {
+                robot.intake(TeamRobot_R5.INTAKE_OPTION.INTAKE,-1);
+            } else if (gamepad1.y) {
+                robot.intake(TeamRobot_R5.INTAKE_OPTION.OUTTAKE,1);
+            }
+
+            if(!gamepad1.x&&!gamepad1.b) {
+                robot.intake(TeamRobot_R5.INTAKE_OPTION.INTAKE,0);
+            }
+            if (gamepad2.right_trigger>0.1) {
+                robot.linear_lift.setPower(-gamepad2.right_trigger);
+            }
+            if (gamepad2.left_trigger>0.1){
+                robot.linear_lift.setPower(gamepad2.left_trigger);
+            }
+            if(gamepad2.left_trigger <0.1 && gamepad2.right_trigger <0.1){
+                robot.linear_lift.setPower(0);
+            }
+
+            //linear_arm operations
+
+            if (gamepad2.left_bumper){
+                if (arm_state == false&&gamepad2.left_bumper&&arm_complete) {
+                    arm_complete=false;
+                    robot.linear_arm.setPosition(1);
+                    arm_complete=true;
+                    arm_state = true;
+                    sleep(200);
+
+                } else if (arm_state == true&&gamepad2.left_bumper&&arm_complete) {
+                    arm_complete=false;
+                    robot.linear_arm.setPosition(0);
+                    arm_complete=true;
+                    arm_state = false;
+                    sleep(200);
+                }
+            }
+            // clamp operations
+            if (gamepad2.b){
+                if (clamp_state == false&&gamepad2.b&&clamp_complete) {
+                    clamp_complete=false;
+                    robot.clamp.setPosition(0.8);
+                    clamp_state = true;
+                    clamp_complete=true;
+                    sleep(200);
+
+                } else if (clamp_state == true&&gamepad2.b&&clamp_complete) {
+                    clamp_complete=false;
+                    robot.clamp.setPosition(0);
+                    clamp_state = false;
+                    clamp_complete=true;
+                    sleep(200
+                    );
+                }
+            }
+            // semi auto button operation
+            if (gamepad2.a){
+                if (foundation_state == false) {
+                    foundation_state = true;
+                    robot.foundation_clamp.setPosition(1.0);
+                    sleep(200);
+
+                } else if (foundation_state == true) {
+                    foundation_state = false;
+                    robot.foundation_clamp.setPosition(0);
+                    sleep(200);
+                }
+            }
+
+        }
         //Linear lift operations
-    if (gamepad2.left_bumper){ 
-        if(arm_state == false&&gamepad2.left_bumper&&linear_lift) {
-            linear_lift = false;
-            robot.linear_lift.setPosition(1);
-            linear_lift = true;
-            sleep(200);
-        } else if (arm_state == true&&gamepad2.left_bumper&&linear_lift) {
-            linear_lift=false;
-            robot.linear_arm.setPosition(0);
-            linear_lift=true;
-            arm_state = false;
-            sleep(200);
-        }
-        }
+
     }
 
         // Gripper operations
